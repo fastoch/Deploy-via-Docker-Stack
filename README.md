@@ -51,8 +51,22 @@ Despite all the obvious advantages containers offer, VMs are still relevant in s
 - start VS Code and open the folder that contains our React app, its name is 'youtube-stats'
 - open the file called `Dockerfile`
 
+```dockerfile
+FROM node:latest
+RUN mkdir /app/src
+WORKDIR /app/src
+COPY package.json .
+```
+
+The above dockerfile will allow us to build a Docker image that we can later use to run containerized versions of our React app.
+- The first line pulls the latest version of the Node.js runtime from the Docker Hub registry
+  - it actually pulls an image that contains Debian in which Node.js is already installed
+- The second line creates a directory and a subdirectory where we'll copy our app files (inside the container)
+- The third line sets the working directory, so the next commands will be run in this directory
+- The fourth line copies the package.json file from the host system to the working directory located inside the container
+- 
 
 
-@13/59
+@16/59
 ---
 EOF
