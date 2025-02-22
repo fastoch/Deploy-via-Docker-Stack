@@ -31,7 +31,9 @@ A container is also a running instance of a docker image.
 ## VM vs Container
 
 A Virtual Machine has a complete OS on it. It's the hardware that is virtualized.  
+VMs use the hardware resources of the host system thanks to what we call a "**hypervisor**".  
 
+Containers don't have an actual OS, they use a virtualized OS 
 
 @5/59
 ---
