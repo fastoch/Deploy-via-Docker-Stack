@@ -40,14 +40,18 @@ Containers can boot up instantly, since there's no OS to boot.
 
 Despite all the obvious advantages containers offer, VMs are still relevant in some use cases.  
 
-# Let's practice Docker
+# Containeriziing a React App
 
-## Setup
-
-- Download and install Docker Desktop
+- install Docker Desktop
+- install VS Code
+- install Git
+- Open a terminal
+- `cd` into the folder where you house your Dev projects
+- clone the repository containing our React app: `git clone https://github.com/rodgtr1/youtube-stats`
+- start VS Code and open the folder that contains our React app, its name is 'youtube-stats'
 - 
 
 
-@7/59
+@11/59
 ---
 EOF
