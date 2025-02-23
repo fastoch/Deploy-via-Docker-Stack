@@ -93,16 +93,54 @@ It's actually pretty simple, and we'll see how to deploy a simple Web applicatio
 - Open VS Code
 - Run `git clone https://github.com/dreamsofcode-io/zenstats.git`
 
-If we open the compose.base.yaml file, we'll see that we have 2 distinct services:
+If we open the `compose.base.yaml` file, we'll see that we have 2 distinct services:
 - the web application
 - a postgres database
 
-  
+In addition to having the Dockerfile and docker-compose files already defined, this application has a GitHub actions setup as well.  
+These actions can be found in the `pipeline.yaml` file that is located in the .github/workflows folder.  
+
+The `pipeline.yaml` file performs 2 different automations:
+- running the automated tests, and if they pass, move on to the second step
+- building and pushing a new Docker image of the application to the **GitHub Container Registry (GHCR)**
+
+The interesting thing to note here is that the Docker image is **tagged** with both `latest` and the same `commit hash` that is found at the repo at the time the image is built:  
+![image](https://github.com/user-attachments/assets/db506650-8257-4677-92d2-4b9c65fb0d8b)  
+
+Which makes it very easy to correlate the docker image with the code that is was built from.  
+
+# Deploy our app to a VPS instance
+
+- purchase a VPS hosting plan on a platform such as Hostinger - https://www.hostinger.fr/vps#pricing (10% off with 'DREAMSOFCODE')
+- select Ubuntu 24.04
+- create a pwd for the root user
+- give your VPS a hostname
+- generate and add an SSH public key
+- if you have a spare domain name, add a `DNS A record` to your VPS (by adding the public IP address in the 'Points to' field)
+- if not, then you can buy one from hostinger
+
+Once your VPS is set up, ssh into it as your root user.  
+Then, install the Docker engine: https://docs.docker.com/engine/install/ubuntu/  
+
+
+
+---
+
+## Setting up a production-ready VPS 
+
+If you're going to use this VPS as a production machine, then I would recommend going through the steps described in the following video:  
+https://www.youtube.com/watch?v=F-9KWQByeU0  
+
+Alternatively, you can also find a step-by-step guide over here:  
+https://github.com/dreamsofcode-io/zenstats/blob/main/docs/vps-setup.md
+
+---
 
 
 
 
 
-@5/28
+
+@8/28
 ---
 EOF
