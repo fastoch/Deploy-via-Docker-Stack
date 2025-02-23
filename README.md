@@ -19,7 +19,7 @@ Additionally, by needing to ssh in and copy over the compose.yaml file in order 
 Instead of this manual process, I'd rather have a solution that allows me to easily ship remotely through either my local machine or via **CI/CD**.  
 
 However, rather than using one of the platforms that provide such a service, I did some research and found a solution.  
-A solution that not only solves my issue with Docker Compose, but also allows me to use the same Docker compose file I already have set up.  
+A solution that not only solves my issue with Docker Compose, but also allows me to use the same Docker compose files I already have set up.  
 
 That solution is **Docker Stack**, which has quickly become my favorite way to deploy my apps to a VPS.  
 
