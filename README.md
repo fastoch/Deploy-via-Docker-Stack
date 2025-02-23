@@ -77,7 +77,7 @@ Valkey was created in **2024** as a fork of Redis 7.2.4 in **response to Redis L
 
 ---
 
-# Other benefits
+# Other benefits from using Docker Stack
 
 Besides being able to deploy and redeploy my application services on a remote VPS from my local machine, I'm also able to manage  
 and monitor my application from my local machine as well, such as:
@@ -108,6 +108,8 @@ The interesting thing to note here is that the Docker image is **tagged** with b
 ![image](https://github.com/user-attachments/assets/db506650-8257-4677-92d2-4b9c65fb0d8b)  
 
 Which makes it very easy to correlate the docker image with the code that is was built from.  
+
+---
 
 # Deploy our app to a VPS instance
 
@@ -147,10 +149,10 @@ https://github.com/dreamsofcode-io/zenstats/blob/main/docs/vps-setup.md
 With our VPS set up, we can exit out of SSH.  
 Now, we need to change our Docker host to be our VPS instance, which can be done in a couple of different ways.  
 
-The first method is to set the DOCKER_HOST environment variable so it points to our VPS.  
+- The first method is to set the DOCKER_HOST environment variable so it points to our VPS.  
 For example, we could run something like `export DOCKER_HOST=ssh://root@zenstats.com`  
 
-The other (preferred) way to change the Docker host is by using the `docker context` command, which allows you to store and manage multiple Docker hosts.  
+- The other (preferred) way to change the Docker host is by using the `docker context` command, which allows you to store and manage multiple Docker hosts.  
 This second method makes it easy to switch between your Docker hosts when you have multiple VPSs.  
 
 ### Using docker context
@@ -160,6 +162,7 @@ For example: `docker context create zenstats-app`
 
 Then, we can define the Docker endpoints by using the `--docker` flag: `docker context create zenstats-app --docker "host=ssh://root@zenstat.com"`  
 The general syntax is: `docker context create <contextName> --docker "host=ssh://<userName>@<VPS_hostname_or_IP_address>`  
+
 If you dont' have a domain name set up, you can just use the VPS's IP address instead.  
 
 Once we've created our Docker context, we can make use of it via the `docker context use` command.  
@@ -169,13 +172,85 @@ Now, whenever we perform a docker command, instead of taking place on our local 
 
 With our context defined, we're now ready to set up our node to use Docker Stack.  
 
-### Setting up our node
+## Setting up our node
 
 We first need to enable **Docker Swarm** mode on our VPS via the `docker swarm init` command.  
-Upon running this command, you should then receive a token that will allow you to connect other VPS instances to this machine.  
+Upon running this command, you should then receive a token that will allow you to connect other VPS instances to this machine,  
+in order to form a **Docker swarm cluster**.  
+
+With swarm mode enabled, we can now deploy our application using the `docker stack deploy` command.  
+Passing in the path to our Docker compose file and the stack name: `docker stack deploy -c ./compose.yaml <stackName>`  
+
+When executing the above command, we should see some output letting us know that the different services of our stack are being deployed.  
+Once completed, we can open up a browser window and head over to our domain name or to the IP address of our VPS, to check that our app is now deployed.  
+
+## Private images
+
+This remote deployment also works when it comes to private images.  
+
+If we change our compose.yaml file to make use of a private image, when we'll use the `docker stack deploy` command, we can see that it's deployed successfully.  
+However, we'll get a warning message in our terminal:  
+![image](https://github.com/user-attachments/assets/1b43a6bc-a941-4132-af69-f08b52c45bcb)  
+
+This message is only really an issue if you're running a Docker swarm cluster.  
+
+To resolve this, we just need to use the `--with-registry-auth` flag when running the `docker stack deploy` command.  
+
+---
+
+# Secrets Management
+
+## Docker Compose limitations
+
+We could actually make remote deployments combining the use of Docker context (or DOCKER_HOST) with Docker compose.  
+However, you would face an issue that would cause your deployments to fail when running the `docker compose -f compose.yaml up` command.  
+That's because of how docker compose manages secrets.  
+![image](https://github.com/user-attachments/assets/6750dae8-c99d-4ffa-945e-f1b1b94a3ff5)
+
+Docker Compose implements secrets by binding local files to the container.  
+When using secrets in a Compose file, it expects the secret files to exist on the host machine where the docker compose command is executed.   
+This works well for local development but becomes problematic in remote deployment scenarios.  
+
+When deploying to a remote host, the local file paths specified in the Compose file may not exist on the remote system.  
+For example:
+- A secret defined as /run/secrets/secret_key.txt on a local Linux machine
+- When deployed from a Windows system to a remote Linux host, Docker Compose might look for C:/run/secrets/secret_key.txt
+This mismatch in file paths leads to errors such as "invalid mount config" or "bind source path does not exist".
+
+Additionally, there's no easy way to manage the files on the remote machine without resorting to SSH.  
+
+For these reasons, it makes sense to prefer Docker Swarm over Docker Compose, as they have more robust secrets management.  
+
+## Docker Swarm is better
+
+With Docker Swarm, secrets are managed via the `docker secret` command.  
+This command allows to create a secret inside of our Docker host in a way that's both encrypted at rest, and encrypted during transit.  
+
+`docker secret create db-password ./password.txt` or `docker secret create db-password -`
+- The first argument of this command is the name of the secret
+- The second argument is the secret's actual value 
+
+Since Docker Secret is very secure, we can't just enter in the secret's value, we need to either:
+- load this value in from a file,
+- or load this in through the standard input, using just a dash
+
+To add a secret via STDIN on a MacOS or Linux system, you can use something such as the `printf` command: 
+```bash
+printf 'mySecretPassword' | docker secret create db-password -
+```
+
+To display our secrets information: `docker secret ls`  
+But there's no way for us to retrieve a secret from Docker, which is why you should store them securely somewhere else at creation time.  
+
+Once we've securely created our secret, we can then use it similar to how we would with Docker Compose.  
+However, rather than 
+```yaml
+secrets:
+  db-password:
+    file: 
+```
 
 
-
-@11/28
+@15/28
 ---
 EOF
