@@ -1,4 +1,4 @@
-# Deploy to a VPS via Docker Stack
+# Deploy to a VPS via Docker Stack (Nov 2024)
 
 src = https://www.youtube.com/watch?v=fuZoxuBiL9o
 
@@ -33,9 +33,12 @@ It has support for many features that are important when it comes to running a p
 - Rolling Releases
 - Secure Secrets
 - Service Rollbacks
-- Remote Deployments
 - Clustering
 
+Not only this, but when combined with **Docker Context**, I'm able to remotely manage and deploy multiple VPS instances from my own workstation.  
+All in a **secure** and **fast** way.  
+
+Let's say I want to make a change to an existing web app service stack by adding in a **Valkey** instance.  
 
 
 
