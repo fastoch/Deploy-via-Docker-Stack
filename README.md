@@ -97,7 +97,7 @@ If we open the `compose.base.yaml` file, we'll see that we have 2 distinct servi
 - the web application
 - a postgres database
 
-In addition to having the Dockerfile and docker-compose files already defined, this application has a GitHub actions setup as well.  
+In addition to having the Dockerfile and docker-compose files already defined, this application has some GitHub actions setup as well.  
 These actions can be found in the `pipeline.yaml` file that is located in the .github/workflows folder.  
 
 The `pipeline.yaml` file performs 2 different automations:
@@ -122,7 +122,9 @@ Which makes it very easy to correlate the docker image with the code that is was
 - if not, then you can buy one from hostinger
 
 Once your VPS is set up, ssh into it as your root user.  
-Then, install the Docker engine: https://docs.docker.com/engine/install/ubuntu/  
+Then, install the Docker engine, and follow the post-install steps: 
+- https://docs.docker.com/engine/install/ubuntu/
+- https://docs.docker.com/engine/install/linux-postinstall/
 
 Note that we don't have to install the docker-buildx and docker-compose plugins, we won't need them.  
 
@@ -160,9 +162,20 @@ Then, we can define the Docker endpoints by using the `--docker` flag: `docker c
 The general syntax is: `docker context create <contextName> --docker "host=ssh://<userName>@<VPS_hostname_or_IP_address>`  
 If you dont' have a domain name set up, you can just use the VPS's IP address instead.  
 
+Once we've created our Docker context, we can make use of it via the `docker context use` command.  
+Passing in the name of the context we've just created: `docker context use zenstats-app`
+
+Now, whenever we perform a docker command, instead of taking place on our local machine, it will run on the docker instance of our VPS.  
+
+With our context defined, we're now ready to set up our node to use Docker Stack.  
+
+### Setting up our node
+
+We first need to enable **Docker Swarm** mode on our VPS via the `docker swarm init` command.  
+Upon running this command, you should then receive a token that will allow you to connect other VPS instances to this machine.  
 
 
 
-@10/28
+@11/28
 ---
 EOF
