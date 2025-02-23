@@ -38,10 +38,71 @@ It has support for many features that are important when it comes to running a p
 Not only this, but when combined with **Docker Context**, I'm able to remotely manage and deploy multiple VPS instances from my own workstation.  
 All in a **secure** and **fast** way.  
 
-Let's say I want to make a change to an existing web app service stack by adding in a **Valkey** instance.  
+Let's say I want to make a change to an existing Web App Service Stack by adding in a **Valkey** instance.  
+This Web app is running on a VPS and is deployed via Docker Stack.  
+
+All I need to do is edit my docker-compose.yaml file and add in the following lines:
+```yaml
+valkey:
+  image: "valkey/valkey:8"
+  volumes:
+    - valkey: /data
+```
+- The first line defines a new service named "valkey"
+- The second one specifies that this service should use the Valkey image version 8 from the Docker Hub repository
+- The third and fourth lines create a named volume called "valkey" and mounts it to the /data directory inside the container.
+
+Then, in order to deploy this, I can run the `docker stack deploy` command, passing in the docker-compose file that I want to use, and the name of my stack.
+```bash
+docker stack deploy -c ./docker-compose.yaml <stackName>
+```
+
+The `docker stack deploy -c` command is used to deploy a stack of services to a Docker swarm.  
+Here's how it works:
+- The `-c` flag is short for `--compose-file` and is used to specify the path to a Compose file.
+- The command syntax is `docker stack deploy -c <path-to-compose-file> <stack-name>`
+
+After deployment, you can check the status of your services using:
+```bash
+docker service ls
+```
+
+---
+
+## Side note about Valkey
+
+Valkey is an **open-source**, high-performance, in-memory key-value datastore that serves as a **successor to Redis**.   
+It functions as a **distributed database**, cache, and message broker with optional durability.  
+Valkey was created in **2024** as a fork of Redis 7.2.4 in **response to Redis Ltd.'s switch to proprietary licensing**.  
+
+---
+
+# Other benefits
+
+Besides being able to deploy and redeploy my application services on a remote VPS from my local machine, I'm also able to manage  
+and monitor my application from my local machine as well, such as:
+- being able to view the different services logs
+- adding secrets securely
+
+I've also managed to set up Docker Stack to work with my CI/CD pipeline using **GitHub actions**.  
+Meaning whenever I push a code change to the main branch of my repo, it'll automatically deploy my entire stack.  
+
+# How difficult is it to get set up?
+
+It's actually pretty simple, and we'll see how to deploy a simple Web application on a VPS.  
+- Open VS Code
+- Run `git clone https://github.com/dreamsofcode-io/zenstats.git`
+
+If we open the compose.base.yaml file, we'll see that we have 2 distinct services:
+- the web application
+- a postgres database
+
+  
 
 
 
-@3/28
+
+
+@5/28
 ---
 EOF
