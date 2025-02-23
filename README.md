@@ -111,6 +111,8 @@ Which makes it very easy to correlate the docker image with the code that is was
 
 # Deploy our app to a VPS instance
 
+## VPS setup
+
 - purchase a VPS hosting plan on a platform such as Hostinger - https://www.hostinger.fr/vps#pricing (10% off with 'DREAMSOFCODE')
 - select Ubuntu 24.04
 - create a pwd for the root user
@@ -122,11 +124,13 @@ Which makes it very easy to correlate the docker image with the code that is was
 Once your VPS is set up, ssh into it as your root user.  
 Then, install the Docker engine: https://docs.docker.com/engine/install/ubuntu/  
 
+Note that we don't have to install the docker-buildx and docker-compose plugins, we won't need them.  
 
+Once Docker is installed, we can check that it's working by running the `docker ps` command.  
 
 ---
 
-## Setting up a production-ready VPS 
+### Setting up a production-ready VPS 
 
 If you're going to use this VPS as a production machine, then I would recommend going through the steps described in the following video:  
 https://www.youtube.com/watch?v=F-9KWQByeU0  
@@ -136,11 +140,29 @@ https://github.com/dreamsofcode-io/zenstats/blob/main/docs/vps-setup.md
 
 ---
 
+## Deploying our app to the VPS
+
+With our VPS set up, we can exit out of SSH.  
+Now, we need to change our Docker host to be our VPS instance, which can be done in a couple of different ways.  
+
+The first method is to set the DOCKER_HOST environment variable so it points to our VPS.  
+For example, we could run something like `export DOCKER_HOST=ssh://root@zenstats.com`  
+
+The other (preferred) way to change the Docker host is by using the `docker context` command, which allows you to store and manage multiple Docker hosts.  
+This second method makes it easy to switch between your Docker hosts when you have multiple VPSs.  
+
+### Using docker context
+
+To create a new Docker context, we'll use the `docker context create` command, passing in the name we want to give it.  
+For example: `docker context create zenstats-app`  
+
+Then, we can define the Docker endpoints by using the `--docker` flag: `docker context create zenstats-app --docker "host=ssh://root@zenstat.com"`  
+The general syntax is: `docker context create <contextName> --docker "host=ssh://<userName>@<VPS_hostname_or_IP_address>`  
+If you dont' have a domain name set up, you can just use the VPS's IP address instead.  
 
 
 
 
-
-@8/28
+@10/28
 ---
 EOF
