@@ -1,6 +1,6 @@
-# Deploy with Docker (2024)
+# Deploy to a VPS via Docker Stack
 
-Dave Gray tutorial - https://www.youtube.com/watch?v=NL23_cVq6XI  
+src = https://www.youtube.com/watch?v=fuZoxuBiL9o
 
 ---
 
