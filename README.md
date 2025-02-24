@@ -1,6 +1,8 @@
 # Deploy to a VPS via Docker Stack (Nov 2024)
 
-src = https://www.youtube.com/watch?v=fuZoxuBiL9o
+**resources**: 
+- https://www.youtube.com/watch?v=fuZoxuBiL9o
+- https://github.com/dreamsofcode-io/zenstats.git
 
 ---
 
@@ -441,8 +443,18 @@ example: `docker service rollback zenfulstats_web`
 
 ## Automated Deployments - Docker Stack + GitHub Actions
 
-In this tutorial's repo - 
+### The .yaml file
+
+- Go to https://github.com/dreamsofcode-io/zenstats/blob/main/.github/workflows/pipeline.yaml
+- We have 3 jobs here: "run-tests", "build-and-push-image", and "deploy"
+- The third job is where the actual `docker stack` deployment takes place
+
+### The "deploy" job
+
+In this "deploy" job, you'll notice that I'm defining the build-and-push step in the "needs" field.  
 
 
 
-@20/28
+
+
+@21/28
