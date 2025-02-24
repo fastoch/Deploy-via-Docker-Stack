@@ -427,8 +427,22 @@ services:
 
 Because of the way that Docker Compose handles load balancing (only able to bind a single instance on a given port), it prevents the original client IP from being forwarded to your services.  
 
-There is however an unofficial solution called 
+There is however an unofficial solution called **docker-ingress-routing-daemon (DIRD)**.  
+https://github.com/newsnowlabs/docker-ingress-routing-daemon  
 
-@19/28
 ---
-EOF
+
+## Services Rollback with Docker Swarm
+
+syntax: `docker service rollback <stackName_serviceName>`  
+example: `docker service rollback zenfulstats_web`
+
+---
+
+## Automated Deployments - Docker Stack + GitHub Actions
+
+In this tutorial's repo - 
+
+
+
+@20/28
