@@ -378,11 +378,43 @@ Which shows us that the built-in load balancer is distributing the requests betw
 The default load balancing method is "**Round Robin**".  
 
 Whilst we could scale up replicas with Docker Compose, it's only able to bind a single instance on a given port.  
-Which means, in order to effectively use load balancing, we would need to use an external proxy such as **Traefik** or **Nginx**.  
+Which means, in order to effectively use load balancing, we would need to use an **external proxy** such as **Traefik** or **Nginx**.  
+
+- https://github.com/traefik/traefik - reverse proxy + load balancer
+
+In addition to handling load balancing, **Traefik** also provides the ability for **HTTPS**, and does a great job at forwarding client IPs.  
+
+Example implementation of Traefik in a compose.yaml file:
+```yaml
+services:
+  traefik:
+    image: traefik:v3.1
+    command:
+      - "--providers.docker"
+      - "--providers.docker.exposed by default=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificates resolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email-elliott@zenful.site"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - mode: host
+        protocol: tcp
+        published: 80
+        target: 80
+      - mode: host
+        protocol: tcp
+        published: 443
+        target: 443
+    volumes:
+      - letsencrypt: /letsencrypt
+      - /var/run/docker.sock: /var/run/docker.sock
+```
 
 
 
-
-@18/28
+@19/28
 ---
 EOF
