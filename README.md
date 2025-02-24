@@ -452,8 +452,29 @@ example: `docker service rollback zenfulstats_web`
 ### The "deploy" job
 
 In this "deploy" job, you'll notice that I'm defining the build-and-push step in the "needs" field.  
+```yaml
+deploy:
+  runs-on: ubuntu-latest
+  needs:
+    - build-and-push-image
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v2
 
+  - name: create env file
+    run: |
+      echo "GIT_COMMIT_HASH=${{ github.sha }}" >> ./envfile
 
+  - name: Docker Stack Deploy
+    uses: cssnr/stack-deploy-action@v1
+    with:
+      name: zenfulstats
+      file: docker-stack.yaml
+      host: zenful.site
+      user: deploy
+      ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      env_file: ./envfile
+```
 
 
 
