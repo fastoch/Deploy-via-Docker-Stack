@@ -286,7 +286,7 @@ In our example, the compose.yaml will look something like that:
 ```yaml
 services:
   web:
-    image: ghcr.io/dreamsofcode-io/zenstats:latest
+    image: ghcr.io/dreamsofcode-io/zenstats:<image_tag>
     secrets:
       - db-password
     environment:
@@ -347,9 +347,35 @@ This approach aims to minimize downtime during updates by ensuring the new versi
 It's particularly useful for achieving **zero-downtime deployments**, especially when you have only one replica of the service.  
 However, it's **important** to note that using `start-first` may temporarily **consume more resources** during the update process, as both the old and new versions will be running concurrently for a short period.  
 
-To fix the "running the old web app version" issue, we need to 
+To fix this "running the old web app version" issue, we need to: 
+- go to the GitHub repo: https://github.com/dreamsofcode-io/zenstats/pkgs/container/zenstats
+- and copy the **latest image tag** that is the alphanumeric string at the end of the `docker pull` command
+  - currently, this tag is: 025f001c2b1a80d7a577c73185a1ed9efe8e575e
+- then paste this tag at the end of the following line in the compose.yaml file
+```yaml
+web:
+  image: ghcr.io/dreamsofcode-io/zenstats:<latest_image_tag>
+```
+
+Updating the image tag allows our web app to connect to the database via the POSTGRES_PWD_FILE environment variable.  
+Now, we can redeploy our services via `docker stack deploy -c compose.yaml zenfulstats`  
+
+And now the `docker ps` command will show that both our services (web app and postgres database) are running successfully.  
+
+---
+
+## Load balancing
+
+Another feature that Docker Compose doesn't support is load balancing.  
+Fortunately, both Docker Stack and Docker Swarm natively support that feature.  
+
+To show this in action, we can scale up the web app to 3 replicas.  
+For that, we need to run `docker service scale zenfulstats_web=3`  
+The syntax is `docker service scale <stackName_serviceName>=<numberOfReplicas>`  
 
 
-@17/28
+
+
+@18/28
 ---
 EOF
