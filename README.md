@@ -373,6 +373,13 @@ To show this in action, we can scale up the web app to 3 replicas.
 For that, we need to run `docker service scale zenfulstats_web=3`  
 The syntax is `docker service scale <stackName_serviceName>=<numberOfReplicas>`  
 
+Next, we can tail the logs via `docker service logs zenfulstats_web -f`  
+Which shows us that the built-in load balancer is distributing the requests between our 3 replicas (zenfulstats_web.1, zenfulstats_web.2 and zenfulstats_web.3)  
+The default load balancing method is "**Round Robin**".  
+
+Whilst we could scale up replicas with Docker Compose, it's only able to bind a single instance on a given port.  
+Which means, in order to effectively use load balancing, we would need to use an external proxy such as **Traefik** or **Nginx**.  
+
 
 
 
