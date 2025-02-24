@@ -226,6 +226,8 @@ For these reasons, it makes sense to prefer Docker Swarm over Docker Compose, as
 With Docker Swarm, secrets are managed via the `docker secret` command.  
 This command allows to create a secret inside of our Docker host in a way that's both encrypted at rest, and encrypted during transit.  
 
+### Creating a secret
+
 `docker secret create db-password ./password.txt` or `docker secret create db-password -`
 - The first argument of this command is the name of the secret
 - The second argument is the secret's actual value 
@@ -239,18 +241,101 @@ To add a secret via STDIN on a MacOS or Linux system, you can use something such
 printf 'mySecretPassword' | docker secret create db-password -
 ```
 
-To display our secrets information: `docker secret ls`  
-But there's no way for us to retrieve a secret from Docker, which is why you should store them securely somewhere else at creation time.  
+To display our secrets name and ID: `docker secret ls`  
+We can also run `docker secret inspect <secret_ID>` to get information about a specific secret.  
+But there's no way for us to retrieve a secret's value from Docker, which is why we should store them securely somewhere else (in a pwd manager).  
 
-Once we've securely created our secret, we can then use it similar to how we would with Docker Compose.  
-However, rather than 
+### Setting up our newly created secret
+
+Once we've securely created and stored our secret, we can then use it similar to how we would with Docker Compose.  
+However, rather than setting the secret as a file, we define it as external.  
+
+With Docker Compose
 ```yaml
 secrets:
   db-password:
-    file: 
+    file: db-password.txt
 ```
 
+With Docker Swarm
+```yaml
+secrets:
+  db-password:
+    external: true
+```
 
-@15/28
+Then, we must do two things:
+- add the secret to the services that need access to it
+- set the secret in the associated environment variables
+
+In our example, the compose.yaml will look something like that:
+```yaml
+services:
+  web:
+    image: ghcr.io/dreamsofcode-io/zenstats:latest
+    secrets:
+      - db-password
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PWD_FILE=/run/secrets/db-password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=app
+      - POSTGRES_PORT=5432
+      - POSTGRES_SSLMODE=disable
+    ports:
+      - "80:8080"
+    deploy:
+      update_config:
+        order: start-first
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    user: postgres
+    volumes:
+      - db-data: /var/lib/postgresql/data
+    secrets:
+      - db-password
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_PWD_FILE=/run/secrets/db-password
+```
+
+### Redeploying our stack
+
+Now, if we run `docker stack deploy -c compose.yaml zenfulstats`, our database will be working fine.  
+However, if we run `docker ps -a`, we'll notice that the new version of our web application is failing.  
+
+This is because we're actually using an old image version that doesnt have the environment variable set up with the db-password file.  
+So it's unable to connect to the database and exiting early.  
+
+And if you open up a web browser and head over to our application, you'll see it's still running...  
+This is because Docker Stack has support for **rolling releases**, which means it's still running the old configuration from before the secret's creation.  
+
+The `docker stack deploy` command basically acts as a very simple blue/green deployment.  
+This behavior is configured using the following 3 lines:
+```yaml
+deploy:
+  update_config:
+    order: start-first
+```
+
+Let's explain how these 3 lines are working:  
+- The `update_config` section specifies how the service should be updated when changes are applied.
+- The `order: start-first` option determines the sequence of operations during an update.
+- With `start-first`, Docker will:
+  - Start the new task (container) with the updated configuration
+  - Briefly allow the new and old tasks to run simultaneously
+  - Stop the old task once the new one is running
+
+This approach aims to minimize downtime during updates by ensuring the new version is up and running before stopping the old one.   
+It's particularly useful for achieving **zero-downtime deployments**, especially when you have only one replica of the service.  
+However, it's important to note that using `start-first` may temporarily consume more resources during the update process, as both the old and new versions will be running concurrently for a short period.  
+
+
+
+
+@17/28
 ---
 EOF
