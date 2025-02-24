@@ -382,7 +382,7 @@ Which means, in order to effectively use load balancing, we would need to use an
 
 - https://github.com/traefik/traefik - reverse proxy + load balancer
 
-In addition to handling load balancing, **Traefik** also provides the ability for **HTTPS**, and does a great job at forwarding client IPs.  
+In addition to handling load balancing, **Traefik** also provides the ability for **HTTPS** (automatically generates certificates), and does a great job at forwarding client IPs.  
 
 Example implementation of Traefik in a compose.yaml file:
 ```yaml
@@ -411,9 +411,23 @@ services:
     volumes:
       - letsencrypt: /letsencrypt
       - /var/run/docker.sock: /var/run/docker.sock
+  web:
+    image: ghcr.io/dreamsofcode-io/zenstats:<latestImageTag>
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services. whoami.loadbalancer.port=80"
+      - "traefik.http.routers.web.rule=Host(`zenful.site`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls.certresolver=myresolver"
 ```
 
+---
 
+## Docker Swarm issue
+
+Because of the way that Docker Compose handles load balancing (only able to bind a single instance on a given port), it prevents the original client IP from being forwarded to your services.  
+
+There is however an unofficial solution called 
 
 @19/28
 ---
