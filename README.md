@@ -233,17 +233,31 @@ This command allows to create a secret inside of our Docker host in a way that's
 - The second argument is the secret's actual value 
 
 Since Docker Secret is very secure, we can't just enter in the secret's value, we need to either:
-- load this value in from a file,
-- or load this in through the standard input, using just a dash
+- load this value in from a file, and then delete this file
+- or load this in through the standard input, using just a dash at the end of the command
 
 To add a secret via STDIN on a MacOS or Linux system, you can use something such as the `printf` command: 
 ```bash
-printf 'mySecretPassword' | docker secret create db-password -
+ printf 'mySecretPassword' | docker secret create db-password -
 ```
+Note the space at the beginning of the above command. It's explained in the following note.
+
+---
+
+### IMPORTANT NOTE
+
+Running a command with a leading space is a simple technique to prevent it from being saved in the shell history.  
+This behavior is controlled by the HISTCONTROL environment variable, which is typically set to "ignoreboth" or "ignorespace" by default in many Linux distributions.  
+
+When HISTCONTROL includes "ignorespace", any command that begins with a space character will not be recorded in the shell's history file.   
+This feature allows users to execute sensitive commands or those containing confidential information without leaving a trace in the command history.
+
+---
 
 To display our secrets name and ID: `docker secret ls`  
 We can also run `docker secret inspect <secret_ID>` to get information about a specific secret.  
-But there's no way for us to retrieve a secret's value from Docker, which is why we should store them securely somewhere else (in a pwd manager).  
+
+But there's no way for us to retrieve a secret's value from Docker, which is why we should **store them securely somewhere else** (in a pwd manager).  
 
 ### Setting up our newly created secret
 
@@ -331,9 +345,9 @@ Let's explain how these 3 lines are working:
 
 This approach aims to minimize downtime during updates by ensuring the new version is up and running before stopping the old one.   
 It's particularly useful for achieving **zero-downtime deployments**, especially when you have only one replica of the service.  
-However, it's important to note that using `start-first` may temporarily consume more resources during the update process, as both the old and new versions will be running concurrently for a short period.  
+However, it's **important** to note that using `start-first` may temporarily **consume more resources** during the update process, as both the old and new versions will be running concurrently for a short period.  
 
-
+To fix the "running the old web app version" issue, we need to 
 
 
 @17/28
