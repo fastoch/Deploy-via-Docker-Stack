@@ -538,6 +538,11 @@ From now on, only the `docker stack deploy -c docker-stack.yaml zenfulstats` com
 
 ### Adding the private key to our GitHub repository
 
+- navigate over to the GitHub repo
+- go to Settings > Secrets and variables > Actions
+- click the 'new repository secret' button
+- name it 'DEPLOY_SSH_PRIVATE_KEY', as in our 'pipeline.yaml' file
+- for the secret value, copy/paste it from 
 
 
 @24/28
