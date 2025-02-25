@@ -162,8 +162,11 @@ This second method makes it easy to switch between your Docker hosts when you ha
 To create a new Docker context, we'll use the `docker context create` command, passing in the name we want to give it.  
 For example: `docker context create zenstats-app`  
 
-Then, we can define the Docker endpoints by using the `--docker` flag: `docker context create zenstats-app --docker "host=ssh://root@zenstat.com"`  
-The general syntax is: `docker context create <contextName> --docker "host=ssh://<userName>@<VPS_hostname_or_IP_address>`  
+Then, we can define the Docker endpoints by using the `--docker` flag:  
+`docker context create zenstats-app --docker "host=ssh://root@zenstat.com"`  
+
+The general syntax is:  
+`docker context create <contextName> --docker "host=ssh://<userName>@<VPS_hostname_or_IP_address>`  
 
 If you dont' have a domain name set up, you can just use the VPS's IP address instead.  
 
@@ -542,7 +545,57 @@ From now on, only the `docker stack deploy -c docker-stack.yaml zenfulstats` com
 - go to Settings > Secrets and variables > Actions
 - click the 'new repository secret' button
 - name it 'DEPLOY_SSH_PRIVATE_KEY', as in our 'pipeline.yaml' file
-- for the secret value, copy/paste it from 
+- for the secret value, paste in the contents of the private key
+
+### Push the code to GitHub in order to redeploy your stack
+
+Now, if we go ahead and commit+push our code to GitHub, when we navigate over to that repo, we should see the deployment automation in action:  
+![image](https://github.com/user-attachments/assets/dbf5b86b-8d1c-4969-af42-a3d086056be5)  
+
+With that, our automated deployment setup is complete.
+
+---
+
+## Specifying which image to use for each deployment
+
+If your remember (line 109), for each image that we build in this pipeline, we're tagging it with both the 'latest' tag, and the git commit hash:  
+![image](https://github.com/user-attachments/assets/3504ce44-2f08-45c7-8d18-331361058303)  
+This is the Git commit hash of the code that this image is built from.  
+
+In order to make our deployments more deterministic, we want to make sure to use the same image tag.  
+To achieve this, we can use an environment variable, replacing the reference to our Docker image tag in our docker-stack.yaml file with the following syntax:  
+```yaml
+web:
+  image: ghcr.io/dreamsofcode-io/zenstats:${GIT_COMMIT_HASH}
+```
+Which will cause the tag to be loaded from an environment variable named `GIT_COMMIT_HASH`.  
+
+If I go ahead and set this environment variable to the last image's hash:  
+![image](https://github.com/user-attachments/assets/900ecfa6-903f-4cae-be72-f6f2de369bd3)
+
+And then run the `docker stack deploy` command:  
+![image](https://github.com/user-attachments/assets/2e93af8b-2ba7-4b09-b5ba-a8701a9d96cc)
+We can see our stack is being deployed with the image hash we specified.  
+
+In addition to this, we can also specify a default value for this environment variable in the case where it's not set:  
+```yaml
+web:
+  image: ghcr.io/dreamsofcode-io/zenstats:${GIT_COMMIT_HASH:-latest}
+```
+
+Which, in this case, would set the default value to "latest":  
+![image](https://github.com/user-attachments/assets/1d03eb1f-0c56-4906-a311-c63aa95ba573)  
+
+## Setting the environment variable in our pipeline
+
+The last thing to do now is to set this environment variable in our deployment pipeline.  
+
+This is done by setting the `env_file` option in the stack deploy step:  
+![image](https://github.com/user-attachments/assets/4404a026-8b62-416f-904d-7b5fa7beae0b)  
+
+Then, we can go ahead and create the `envfile` using the step before this one:  
 
 
-@24/28
+
+
+
