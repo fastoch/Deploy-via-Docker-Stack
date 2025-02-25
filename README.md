@@ -520,13 +520,16 @@ After that, let's add the public key to our user's authorized keys:
 With that, we should now be able to ssh into our VPS as the "deploy" user: `ssh deploy@zenful.site -i <path_to_private_key>`  
 Of course the zenful.site domaine name can be replaced with the VPS IP address.  
 
-The -i option in the SSH command is used to specify the private key for authentication.  
+The -i option in the ssh command is to specify the private key for authentication (which succeeds if the private key matches the public one).  
 
 Next, we need to restrict what commands this user can actually perform. To do so:
 - while being logged in to the VPS as the "deploy" user, run `vim ~/.ssh/authorized_keys`
 - press `i` to enter insert mode
-- add the following text before the actual ssh key
+- add the following text before the actual ssh key: `command="docker system dial-stdio"`, with a space between this txt and the key
 - save and quit by pressing the Escape key, typing `:wq`, and pressing Enter
 
+This will restrict the user to only being able to perform the `docker stack deploy` command when using ssh with this key.  
+We can test that this is the case by attempting to run ``
 
-@23/28
+
+@24/28
