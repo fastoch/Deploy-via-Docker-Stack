@@ -492,6 +492,8 @@ The **ssh_key** property is set to a GitHub secret.
 
 **IMPORTANT**: In order for this to work, we need to set both of these up (user and ssh_key) inside of our VPS.  
 
+---
+
 ### Setting up the user and SSH public key on our VPS
 
 It's a good practice to create a new user for our deployments because it allows us to limit the permissions.  
@@ -519,7 +521,6 @@ After that, let's add the public key to our user's authorized keys:
  
 With that, we should now be able to ssh into our VPS as the "deploy" user: `ssh deploy@zenful.site -i <path_to_private_key>`  
 Of course the zenful.site domaine name can be replaced with the VPS IP address.  
-
 The -i option in the ssh command is to specify the private key for authentication (which succeeds if the private key matches the public one).  
 
 Next, we need to restrict what commands this user can actually perform. To do so:
@@ -529,7 +530,14 @@ Next, we need to restrict what commands this user can actually perform. To do so
 - save and quit by pressing the Escape key, typing `:wq`, and pressing Enter
 
 This will restrict the user to only being able to perform the `docker stack deploy` command when using ssh with this key.  
-We can test that this is the case by attempting to run ``
+We can test that this is the case by attempting to ssh in as our "deploy" user: `ssh deploy@zenful.site -i <path_to_private_key>`, which should be rejected.  
+
+From now on, only the `docker stack deploy -c docker-stack.yaml zenfulstats` command should work.
+
+---
+
+### Adding the private key to our GitHub repository
+
 
 
 @24/28
