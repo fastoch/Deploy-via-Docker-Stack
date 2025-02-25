@@ -487,12 +487,12 @@ https://github.com/marketplace/actions/docker-stack-deploy
 Notice the file property value, which is set to `docker-stack.yaml`.  
 This filename is commonly used to differentiate a docker-compose configuration from a docker-stack configuration.  
 
-The user property is set to "deploy".  
-The ssh_key property is set to a GitHub secret.   
+The **user** property is set to "deploy".  
+The **ssh_key** property is set to a GitHub secret.   
 
 **IMPORTANT**: In order for this to work, we need to set both of these up (user and ssh_key) inside of our VPS.  
 
-### Setting up the user and SSH private key on our VPS
+### Setting up the user and SSH public key on our VPS
 
 It's a good practice to create a new user for our deployments because it allows us to limit the permissions.  
 It's a good security measure to limit the amount of damage if the SSH private key happens to be compromised.
@@ -500,8 +500,33 @@ It's a good security measure to limit the amount of damage if the SSH private ke
 - ssh into your VPS
 - once logged in as the root user, create a new user called "deploy": `adduser deploy`
 - add this user to the 'docker' group: `usermod -aG docker deploy`
-- 
+This last cmd will allow the user to perform any docker cmd without using `sudo`.
 
+- to switch from root to the new user: `su - deploy`, ssing the hyphen (-) creates a new environment for the user you're switching to
+- exit the VPS
+
+Next, we need to create an SSH key pair for this new user: `ssh-keygen -t ed25519 -C "deploy@zenful.site"`  
+The creation of this key pair must be done on your local machine, not on the VPS.  
+
+After that, let's add the public key to our user's authorized keys:
+- once you've create the key pair on your local machine, ssh back into your VPS
+- switch from root to the "deploy" user
+- create a `.ssh` folder inside this user's home directory via `mkdir .ssh`
+- copy the ssh public key from your local machine to the VPS `/home/deploy/.ssh` folder
+  - for that, copy the public key to your local machine's clipboard
+  - then run this cmd on your VPS: `echo '<paste_here_the_public_key>' > /home/deploy/.ssh/authorized_keys`
+  - you can check it was correctly copied with `cat /home/deploy/.ssh/authorized_keys`
+ 
+With that, we should now be able to ssh into our VPS as the "deploy" user: `ssh deploy@zenful.site -i <path_to_private_key>`  
+Of course the zenful.site domaine name can be replaced with the VPS IP address.  
+
+The -i option in the SSH command is used to specify the private key for authentication.  
+
+Next, we need to restrict what commands this user can actually perform. To do so:
+- while being logged in to the VPS as the "deploy" user, run `vim ~/.ssh/authorized_keys`
+- press `i` to enter insert mode
+- add the following text before the actual ssh key
+- save and quit by pressing the Escape key, typing `:wq`, and pressing Enter
 
 
 @23/28
