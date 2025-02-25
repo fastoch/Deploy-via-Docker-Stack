@@ -451,7 +451,8 @@ example: `docker service rollback zenfulstats_web`
 
 ### The "deploy" job
 
-In this "deploy" job, you'll notice that I'm defining the build-and-push step in the "needs" field.  
+In this "deploy" job, you'll notice that we're defining the build-and-push step in the "needs" field.  
+Which means it's required pass in order for this job to run.  
 ```yaml
 deploy:
   runs-on: ubuntu-latest
@@ -476,6 +477,31 @@ deploy:
       env_file: ./envfile
 ```
 
+There are 2 steps inside of this job:
+- Checkout the code at the current commit, which is pretty standard in GitHub actions
+- a third-party action to deploy the Docker stack
+
+You can find the documentation for these actions on the GitHub Actions Marketplace:  
+https://github.com/marketplace/actions/docker-stack-deploy  
+
+Notice the file property value, which is set to `docker-stack.yaml`.  
+This filename is commonly used to differentiate a docker-compose configuration from a docker-stack configuration.  
+
+The user property is set to "deploy".  
+The ssh_key property is set to a GitHub secret.   
+
+**IMPORTANT**: In order for this to work, we need to set both of these up (user and ssh_key) inside of our VPS.  
+
+### Setting up the user and SSH private key on our VPS
+
+It's a good practice to create a new user for our deployments because it allows us to limit the permissions.  
+It's a good security measure to limit the amount of damage if the SSH private key happens to be compromised.
+
+- ssh into your VPS
+- once logged in as the root user, create a new user called "deploy": `adduser deploy`
+- add this user to the 'docker' group: `usermod -aG docker deploy`
+- 
 
 
-@21/28
+
+@23/28
