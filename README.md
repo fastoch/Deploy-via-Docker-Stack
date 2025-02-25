@@ -593,9 +593,13 @@ The last thing to do now is to set this environment variable in our deployment p
 This is done by setting the `env_file` option in the stack deploy step:  
 ![image](https://github.com/user-attachments/assets/4404a026-8b62-416f-904d-7b5fa7beae0b)  
 
-Then, we can go ahead and create the `envfile` using the step before this one:  
+Then, we can go ahead and create the `envfile` by adding a step before this one:  
+![image](https://github.com/user-attachments/assets/eba99b00-211f-4134-8744-08ce4950de74)  
 
+Here we're creating a file with a GIT_COMMIT_HASH environment variable set to the current github.sha value.  
 
+Now, if we commit and push this code, we should see (in our GitHub repo) the pipeline working without issue:  
+![image](https://github.com/user-attachments/assets/66a46a52-ac7f-4e98-ab2d-872d6d722c1e)  
 
-
+And we can test that it's using the correct image by adding a version info to the webpage title, for example.
 
